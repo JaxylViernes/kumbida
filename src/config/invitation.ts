@@ -7,6 +7,16 @@
  * ─────────────────────────────────────────────────────────────────────────
  */
 
+/**
+ * Files in /public. Write paths from the site root ('/photos/x.jpg'); this adds the
+ * deploy folder automatically (e.g. /kumbida/ on GitHub Pages).
+ */
+export const asset = (path: string) => {
+  const base = import.meta.env.BASE_URL;
+  if (!path || /^(https?:|data:|blob:)/.test(path) || (base !== '/' && path.startsWith(base))) return path;
+  return base + path.replace(/^\//, '');
+};
+
 export type StoryIllustration = 'meet' | 'date' | 'proposal' | 'forever';
 
 export interface StoryMoment {
@@ -14,7 +24,7 @@ export interface StoryMoment {
   when: string;
   text: string;
   note: string; // small handwritten annotation beside the photo
-  photo?: string; // e.g. '/photos/meet.jpg' — leave empty for an illustrated placeholder
+  photo?: string; // e.g. asset('/photos/meet.jpg') — leave empty for an illustrated placeholder
   illustration: StoryIllustration;
 }
 
@@ -101,8 +111,8 @@ export const invitation = {
   intro: {
     enabled: true,
     /** Optional MP4 (H.264, muted, <= 20 s, <= 4 MB). Empty = animated typographic film. */
-    video: '/video/intro.mp4',
-    poster: '/photos/field.jpg',
+    video: asset('/video/intro.mp4'),
+    poster: asset('/photos/field.jpg'),
     lines: ['Every love story is beautiful,', 'but ours is our favourite.'],
     skipLabel: 'Skip',
     replayLabel: 'Watch our little film',
@@ -120,16 +130,16 @@ export const invitation = {
       seat: 'Row F · Seats 11 & 12',
     },
     collage: [
-      { caption: 'the day we met', illustration: 'meet', photo: '/photos/gaze.jpg' },
-      { caption: 'first adventure', illustration: 'date', photo: '/photos/walk.jpg' },
+      { caption: 'the day we met', illustration: 'meet', photo: asset('/photos/gaze.jpg') },
+      { caption: 'first adventure', illustration: 'date', photo: asset('/photos/walk.jpg') },
     ] as { caption: string; illustration: StoryIllustration; photo?: string }[],
     filmHeading: 'Little moments',
     filmHint: 'tap a frame',
     film: [
-      { title: 'Golden hour', caption: 'The light that evening was everything.', illustration: 'date', photo: '/photos/field.jpg' },
-      { title: 'That smile', caption: 'Still the best view in any room.', illustration: 'meet', photo: '/photos/smile.jpg' },
-      { title: 'Hand in hand', caption: 'Wherever this road goes, together.', illustration: 'proposal', photo: '/photos/together.jpg' },
-      { title: 'Our little film', caption: 'Ten seconds of us — press play.', illustration: 'forever', photo: '/photos/sunset.jpg', video: '/video/intro.mp4' },
+      { title: 'Golden hour', caption: 'The light that evening was everything.', illustration: 'date', photo: asset('/photos/field.jpg') },
+      { title: 'That smile', caption: 'Still the best view in any room.', illustration: 'meet', photo: asset('/photos/smile.jpg') },
+      { title: 'Hand in hand', caption: 'Wherever this road goes, together.', illustration: 'proposal', photo: asset('/photos/together.jpg') },
+      { title: 'Our little film', caption: 'Ten seconds of us — press play.', illustration: 'forever', photo: asset('/photos/sunset.jpg'), video: asset('/video/intro.mp4') },
     ] as FilmMoment[],
     letter: {
       label: 'Read on the night he asked',
@@ -306,9 +316,9 @@ export const invitation = {
     heading: 'Thank You',
     message: 'Thank you for celebrating the beginning of our forever. Your love made the day complete.',
     photos: [
-      { caption: 'golden hour', photo: '/photos/gaze.jpg', illustration: 'proposal' },
-      { caption: 'just married', photo: '/photos/walk.jpg', illustration: 'forever' },
-      { caption: 'forever', photo: '/photos/sunset.jpg', illustration: 'meet' },
+      { caption: 'golden hour', photo: asset('/photos/gaze.jpg'), illustration: 'proposal' },
+      { caption: 'just married', photo: asset('/photos/walk.jpg'), illustration: 'forever' },
+      { caption: 'forever', photo: asset('/photos/sunset.jpg'), illustration: 'meet' },
     ] as { caption: string; photo?: string; illustration: StoryIllustration }[],
   },
 

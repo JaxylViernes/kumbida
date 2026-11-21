@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { invitation } from '../config/invitation';
+import { asset, invitation } from '../config/invitation';
 
 interface Engine {
   play: () => Promise<void>;
@@ -158,7 +158,7 @@ export function useAmbientMusic() {
   const wantPlaying = useRef(false);
 
   const getEngine = () => {
-    if (!engine.current) engine.current = src ? fileEngine(src, volume) : musicBoxEngine(volume);
+    if (!engine.current) engine.current = src ? fileEngine(asset(src), volume) : musicBoxEngine(volume);
     return engine.current;
   };
 
