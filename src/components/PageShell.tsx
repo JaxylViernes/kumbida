@@ -1,6 +1,5 @@
-import { motion } from 'framer-motion';
 import { useLayoutEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { FloralCorner } from './botanicals/Florals';
 
 type Decor = 'lush' | 'light' | 'top' | 'none';
@@ -83,7 +82,7 @@ function FitToPaper({ children, className, padding }: { children: ReactNode; cla
   );
 }
 
-/** Gentle staggered fade-up for printed elements. */
+/** Gentle staggered fade-up for printed elements (CSS — runs off the main thread). */
 export function Reveal({
   children,
   delay = 0,
@@ -96,14 +95,9 @@ export function Reveal({
   className?: string;
 }) {
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
-    >
+    <div className={`reveal ${className}`} style={{ animationDelay: `${delay}s`, '--ry': `${y}px` } as CSSProperties}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 

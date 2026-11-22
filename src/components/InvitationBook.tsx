@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useMotionValue, useSpring } from 'framer-motion';
 import { BookOpen, ChevronLeft, ChevronRight, Hand } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ComponentType, PointerEvent as RPointerEvent, ReactNode } from 'react';
+import type { ComponentType, CSSProperties, PointerEvent as RPointerEvent, ReactNode } from 'react';
 import { invitation, type FilmMoment, type PageId } from '../config/invitation';
 import { readLocal, writeLocal } from '../lib/backend';
 import { phase } from '../lib/phase';
@@ -65,7 +65,12 @@ type Overlay = { kind: 'secret'; id: SecretId } | { kind: 'moment'; moment: Film
 export const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV'];
 
 
-export function InvitationBook() {
+/**
+ * `shown=false` builds the whole invitation ahead of time without displaying it
+ * (display:none — no animations run, nothing is painted), so revealing it later
+ * costs almost nothing.
+ */
+export function InvitationBook({ shown = true }: { shown?: boolean }) {
   const pageIds = invitation.pageOrder[phase];
   const pages = useMemo(
     () =>
@@ -116,7 +121,8 @@ export function InvitationBook() {
     let handle = 0;
     const add = () => setMounted((m) => (want.every((w) => m.includes(w)) ? m : [...new Set([...m, ...want])]));
     // the first time, wait until the opening animation has settled
-    const delay = animatedFirst.current ? 2600 : 120;
+    if (!shown) return;
+    const delay = animatedFirst.current ? 4200 : 120;
     const t = window.setTimeout(() => {
       if (idle) handle = idle(add, { timeout: 800 });
       else add();
@@ -126,7 +132,7 @@ export function InvitationBook() {
       const cancel = (window as Window & { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback;
       if (handle && cancel) cancel(handle);
     };
-  }, [current, turn, pages.length]);
+  }, [current, turn, pages.length, shown]);
 
   useEffect(() => {
     setVisited((v) => (v.has(current) ? v : new Set(v).add(current)));
@@ -172,9 +178,10 @@ export function InvitationBook() {
   const prev = () => go(index - 1);
 
   useEffect(() => {
-    const t = window.setTimeout(() => setHint(false), 6000);
+    if (!shown) return;
+    const t = window.setTimeout(() => setHint(false), 7000);
     return () => window.clearTimeout(t);
-  }, []);
+  }, [shown]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -221,17 +228,14 @@ export function InvitationBook() {
     <BookContext.Provider value={api}>
       <div
         className="fixed inset-0 z-10 flex flex-col items-center justify-center"
+        aria-hidden={!shown || undefined}
         style={{
+          display: shown ? undefined : 'none',
           paddingTop: 'calc(env(safe-area-inset-top, 0px) + 48px)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        <motion.div
-          className="card-frame relative"
-          initial={{ opacity: 0, y: 70, scale: 0.86, rotateX: 14 }}
-          animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-          transition={{ duration: 1.3, ease: [0.2, 0.7, 0.2, 1] }}
-        >
+        <div className="card-enter card-frame relative">
           <motion.div
             className="no-select absolute inset-0"
             // the browser must not hijack sideways swipes (it would cancel them mid-gesture)
@@ -290,15 +294,13 @@ export function InvitationBook() {
               />
             )}
           </AnimatePresence>
-        </motion.div>
+        </div>
 
         {/* ── controls ── */}
-        <motion.nav
-          className="mt-4 flex w-full max-w-[440px] flex-col items-center px-2"
+        <nav
+          className="reveal mt-4 flex w-full max-w-[440px] flex-col items-center px-2"
+          style={{ animationDelay: '1s', '--ry': '12px' } as CSSProperties}
           aria-label="Invitation pages"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.8 }}
         >
           <div className="relative h-5 w-full text-center">
             {/* CSS-only fades: nothing here runs JavaScript while a page is turning */}
@@ -353,7 +355,7 @@ export function InvitationBook() {
             </motion.button>
             <NavArrow dir="next" disabled={index === pages.length - 1} onClick={next} />
           </div>
-        </motion.nav>
+        </nav>
       </div>
     </BookContext.Provider>
   );

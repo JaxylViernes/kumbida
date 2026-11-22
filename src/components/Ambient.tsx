@@ -91,20 +91,27 @@ export function GoldDust({ count = 16 }: { count?: number }) {
   );
 }
 
-/** A one-time flourish of petals bursting upward then falling. */
+/** A one-time flourish of petals bursting upward then falling (CSS only — smooth on phones). */
 export function PetalBurst({ count = 18, className = '' }: { count?: number; className?: string }) {
   const petals = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => {
         const a = (-90 + (rand(i + 70) - 0.5) * 150) * (Math.PI / 180);
         const dist = 90 + rand(i + 80) * 140;
+        const x = Math.cos(a) * dist;
+        const y = Math.sin(a) * dist;
+        const rot = (rand(i + 100) - 0.5) * 720;
         return {
-          x: Math.cos(a) * dist,
-          y: Math.sin(a) * dist,
-          fall: 160 + rand(i + 90) * 220,
-          rot: (rand(i + 100) - 0.5) * 720,
+          style: {
+            '--x': `${x.toFixed(1)}px`,
+            '--y': `${y.toFixed(1)}px`,
+            '--x2': `${(x * 1.25).toFixed(1)}px`,
+            '--y2': `${(y + 160 + rand(i + 90) * 220).toFixed(1)}px`,
+            '--r1': `${(rot * 0.5).toFixed(0)}deg`,
+            '--r2': `${rot.toFixed(0)}deg`,
+            animationDelay: `${(rand(i + 120) * 0.35).toFixed(2)}s`,
+          } as CSSProperties,
           size: 9 + rand(i + 110) * 10,
-          delay: rand(i + 120) * 0.35,
           fill: PETAL_FILLS[i % PETAL_FILLS.length],
         };
       }),
@@ -113,21 +120,9 @@ export function PetalBurst({ count = 18, className = '' }: { count?: number; cla
   return (
     <div className={`pointer-events-none absolute left-1/2 top-1/2 ${className}`} aria-hidden="true">
       {petals.map((p, i) => (
-        <motion.div
-          key={i}
-          className="absolute"
-          initial={{ x: 0, y: 0, opacity: 0, rotate: 0, scale: 0.4 }}
-          animate={{
-            x: [0, p.x, p.x * 1.25],
-            y: [0, p.y, p.y + p.fall],
-            opacity: [0, 1, 0],
-            rotate: [0, p.rot * 0.5, p.rot],
-            scale: [0.4, 1, 0.9],
-          }}
-          transition={{ duration: 3.2, delay: p.delay, times: [0, 0.35, 1], ease: 'easeOut' }}
-        >
+        <div key={i} className="burst-petal" style={p.style}>
           <PetalShape fill={p.fill} size={p.size} />
-        </motion.div>
+        </div>
       ))}
     </div>
   );

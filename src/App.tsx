@@ -15,6 +15,8 @@ type Stage = 'envelope' | 'film' | 'book';
 export default function App() {
   const [stage, setStage] = useState<Stage>('envelope');
   const [replaying, setReplaying] = useState(false);
+  // the film sits hidden from the start so its video is already downloaded when it plays
+  const [filmGone, setFilmGone] = useState(false);
   const music = useAmbientMusic();
   const filmOn = invitation.intro.enabled;
 
@@ -31,9 +33,12 @@ export default function App() {
       <AppContext.Provider value={app}>
         <SvgDefs />
         <div className="desk" aria-hidden="true" />
-        <GoldDust count={14} />
-        <DriftingPetals count={stage === 'book' ? 7 : 10} />
-        <Butterflies />
+        {/* background effects pause while the film covers the screen */}
+        <div className={stage === 'film' || replaying ? 'ambient-paused' : undefined}>
+          <GoldDust count={14} />
+          <DriftingPetals count={stage === 'book' ? 7 : 10} />
+          <Butterflies />
+        </div>
 
         <main className="relative h-full w-full overflow-hidden">
           <AnimatePresence>
@@ -49,13 +54,22 @@ export default function App() {
             )}
           </AnimatePresence>
           {/* The book stays mounted while a replayed film plays, so the guest returns to the same page. */}
-          {stage === 'book' && <InvitationBook />}
+          {/* built (hidden) while the film plays, shown as the film fades out */}
+          {(stage === 'book' || stage === 'film') && <InvitationBook shown={stage === 'book'} />}
         </main>
 
         <AnimatePresence>
-          {stage === 'film' && <CinematicIntro key="film" onDone={() => setStage('book')} />}
           {replaying && <CinematicIntro key="replay" onDone={() => setReplaying(false)} />}
         </AnimatePresence>
+
+        {filmOn && !filmGone && (
+          <CinematicIntro
+            active={stage === 'film'}
+            // the invitation starts appearing underneath while the film fades out
+            onEnding={() => setStage('book')}
+            onDone={() => setFilmGone(true)}
+          />
+        )}
 
         <MusicControl playing={music.playing} onToggle={music.toggle} />
       </AppContext.Provider>

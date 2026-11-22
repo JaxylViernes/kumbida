@@ -45,8 +45,8 @@ export function FloralCorner({
   return (
     <svg
       viewBox="0 0 200 200"
-      className={`pointer-events-none absolute ${className}`}
-      style={{ transform: flip[corner] }}
+      className={`floral-fade pointer-events-none absolute ${className}`}
+      style={{ transform: flip[corner], animationDelay: `${delay}s` }}
       aria-hidden="true"
     >
       <ellipse cx="62" cy="46" rx="62" ry="36" fill="url(#wash-rose)" />

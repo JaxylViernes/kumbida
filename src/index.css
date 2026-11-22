@@ -576,3 +576,217 @@ html.touch .petal:nth-child(n + 6) {
 .leaf-frozen .hint-pulse {
   animation-play-state: paused;
 }
+
+/* ── Intro film (CSS only) ─────────────────────────────────────────── */
+.film-root {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.8s ease, visibility 0s linear 0.8s;
+}
+.film-root.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.8s ease;
+}
+.film-root.is-active.is-ending {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.9s ease;
+}
+.film-bar-top {
+  animation: film-bar-top 1.2s ease-out backwards;
+}
+.film-bar-bottom {
+  animation: film-bar-bottom 1.2s ease-out backwards;
+}
+@keyframes film-bar-top {
+  from { transform: translateY(-100%); }
+}
+@keyframes film-bar-bottom {
+  from { transform: translateY(100%); }
+}
+.film-line {
+  animation: film-line 1.3s ease-out backwards;
+}
+@keyframes film-line {
+  from { opacity: 0; transform: translateY(12px); }
+}
+.film-rise {
+  animation: film-rise 1.8s ease-out backwards;
+}
+@keyframes film-rise {
+  from { opacity: 0; transform: translateY(18px) scale(0.94); }
+}
+.film-fade {
+  animation: film-fade 1s ease-out backwards;
+}
+@keyframes film-fade {
+  from { opacity: 0; }
+}
+.film-rule {
+  animation: film-rule 1.2s ease-out 1.6s backwards;
+}
+@keyframes film-rule {
+  from { transform: scaleX(0); }
+}
+.film-glow {
+  background:
+    radial-gradient(40% 35% at 50% 45%, rgba(232, 206, 160, 0.28), transparent 70%),
+    radial-gradient(30% 40% at 85% 20%, rgba(216, 185, 178, 0.25), transparent 70%);
+  animation: film-glow 14s ease-in-out infinite alternate;
+}
+@keyframes film-glow {
+  from { transform: translate(-4%, 2%); }
+  to { transform: translate(5%, -3%); }
+}
+.film-leak {
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 190, 140, 0.18) 48%, rgba(255, 230, 190, 0.08) 55%, transparent 70%);
+  animation: film-leak 9s ease-in-out infinite;
+}
+@keyframes film-leak {
+  0% { transform: translateX(-30%); }
+  78%, 100% { transform: translateX(160%); }
+}
+
+/* hide & pause the background effects while the film covers the screen */
+.ambient-paused {
+  visibility: hidden;
+}
+.ambient-paused .petal,
+.ambient-paused .dust,
+.ambient-paused .butterfly-path {
+  animation-play-state: paused;
+}
+
+/* ── Petal burst (CSS only) ────────────────────────────────────────── */
+.burst-petal {
+  position: absolute;
+  opacity: 0;
+  animation: burst-petal 3.2s ease-out both;
+  will-change: transform, opacity;
+}
+@keyframes burst-petal {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg) scale(0.4);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(var(--x), var(--y)) rotate(var(--r1)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x2), var(--y2)) rotate(var(--r2)) scale(0.9);
+  }
+}
+
+/* ── Envelope (CSS transitions per phase) ──────────────────────────── */
+.env-caption,
+.env-hint {
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.env-caption {
+  animation: env-fade-down 0.9s ease 0.6s backwards;
+}
+.env-hint {
+  animation: film-fade 0.8s ease 1.6s backwards;
+}
+@keyframes env-fade-down {
+  from { opacity: 0; transform: translateY(-8px); }
+}
+.env-root:not(.phase-idle) .env-caption {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+.env-root:not(.phase-idle) .env-hint {
+  opacity: 0;
+}
+.env-box {
+  animation: env-enter 1.2s cubic-bezier(0.55, 0.05, 0.25, 1) backwards;
+  transition: transform 0.9s cubic-bezier(0.55, 0.05, 0.25, 1), opacity 0.9s ease;
+}
+@keyframes env-enter {
+  from { opacity: 0; transform: translateY(30px) scale(0.94); }
+}
+.env-root.phase-idle .env-box:active {
+  transform: scale(0.98);
+  transition-duration: 0.15s;
+}
+.env-root.phase-presenting .env-box {
+  opacity: 0;
+  transform: translateY(140px) scale(0.92);
+}
+.env-card {
+  transition: transform 1.25s cubic-bezier(0.55, 0.05, 0.25, 1);
+  will-change: transform;
+}
+.env-root.phase-sliding .env-card {
+  transform: translateY(-62%);
+}
+.env-root.phase-presenting .env-card {
+  transform: translateY(-62%) scale(1.12);
+  transition-duration: 0.8s;
+}
+.env-flap {
+  transform-origin: 50% 0%;
+  transform-style: preserve-3d;
+  transition: transform 1.05s cubic-bezier(0.55, 0.05, 0.25, 1);
+  will-change: transform;
+}
+.env-root.phase-opening .env-flap,
+.env-root.phase-sliding .env-flap,
+.env-root.phase-presenting .env-flap {
+  transform: rotateX(178deg);
+}
+.env-hint-line {
+  transform-origin: top;
+  animation: env-hint-line 2.4s ease-in-out infinite;
+}
+@keyframes env-hint-line {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
+}
+
+/* ── Card entrance after the film (CSS, compositor-only) ───────────── */
+.card-enter {
+  animation: card-enter 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s backwards;
+}
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(60px) scale(0.9); }
+}
+
+/* ── Printed elements fading up (replaces JS-driven reveals) ───────── */
+.reveal {
+  animation: reveal 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) backwards;
+}
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(var(--ry, 10px)); }
+}
+.still-page .reveal {
+  animation: none;
+}
+
+/* ── Phones: no per-stroke drawing (it repaints every frame); flowers fade in whole ── */
+html.touch .svg-draw,
+html.touch .svg-grow {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+html.touch .floral-fade {
+  animation: film-fade 1.2s ease-out backwards;
+}
+html.touch .still-page .floral-fade {
+  animation: none;
+}
+html.touch .gold-foil {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-bar-top, .film-bar-bottom, .film-line, .film-rise, .film-fade, .film-rule, .film-glow, .film-leak,
+  .burst-petal, .env-caption, .env-hint, .env-box, .env-hint-line, .card-enter, .reveal, .floral-fade {
+    animation: none !important;
+  }
+}

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { invitation } from '../config/invitation';
+import { asset, invitation } from '../config/invitation';
 import { guest } from '../lib/guest';
 import { phase as timePhase } from '../lib/phase';
 import { PetalBurst } from './Ambient';
@@ -9,16 +9,12 @@ import { WaxSeal } from './WaxSeal';
 
 type Phase = 'idle' | 'breaking' | 'opening' | 'sliding' | 'presenting';
 
-const ease = [0.55, 0.05, 0.25, 1] as const;
-
-/** Paper grain filter used inside the envelope SVGs (static, rendered once). */
-function Grain({ id }: { id: string }) {
+/** Paper grain as a small image tile (SVG noise filters are far too slow on phones). */
+function GrainPattern() {
   return (
-    <filter id={id} x="0" y="0" width="100%" height="100%">
-      <feTurbulence type="fractalNoise" baseFrequency="1.4 1.1" numOctaves="2" seed="3" result="n" />
-      <feColorMatrix in="n" values="0 0 0 0 .4  0 0 0 0 .33  0 0 0 0 .22  0 0 0 .5 0" />
-      <feComposite in2="SourceGraphic" operator="in" />
-    </filter>
+    <pattern id="env-tex" patternUnits="userSpaceOnUse" width="34" height="24">
+      <image href={asset('/textures/grain.png')} width="34" height="24" preserveAspectRatio="none" />
+    </pattern>
   );
 }
 
@@ -53,43 +49,30 @@ export function Envelope({ onOpenStart, onOpened }: { onOpenStart?: () => void; 
     at(3600, onOpened);
   };
 
-  const opened = phase === 'opening' || phase === 'sliding' || phase === 'presenting';
   const sliding = phase === 'sliding' || phase === 'presenting';
 
   return (
     <motion.div
-      className="fixed inset-0 z-10 flex flex-col items-center justify-center px-4"
+      className={`env-root phase-${phase} fixed inset-0 z-10 flex flex-col items-center justify-center px-4`}
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
       exit={{ opacity: 0, transition: { duration: 0.6 } }}
     >
       {/* editorial caption above */}
-      <motion.div
-        className="mb-[6vh] text-center"
-        initial={{ opacity: 0, y: -8 }}
-        animate={phase === 'idle' ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
-        transition={{ duration: 0.9, delay: phase === 'idle' ? 0.6 : 0 }}
-      >
+      <div className="env-caption mb-[6vh] text-center">
         <Laurel className="mx-auto mb-2 h-4 w-24" gold delay={0.8} />
         <p className="font-caps text-[11px] uppercase tracking-[0.32em] text-olive/70">{wedding.short}</p>
-      </motion.div>
+      </div>
 
       {/* idle float */}
-      <motion.div className={phase === 'idle' ? 'env-float' : undefined}>
-        <motion.div
+      <div className={phase === 'idle' ? 'env-float' : undefined}>
+        <div
           role="button"
           tabIndex={0}
           aria-label={`${envelopeTitle}. ${wording.envelopeHint}.`}
           onClick={open}
           onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), open())}
-          className="envelope-size no-select relative cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
+          className="env-box envelope-size no-select relative cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
           style={{ perspective: 1100 }}
-          initial={{ opacity: 0, y: 30, scale: 0.94 }}
-          animate={
-            phase === 'presenting'
-              ? { opacity: 0, y: 140, scale: 0.92, transition: { duration: 0.9, ease } }
-              : { opacity: 1, y: 0, scale: 1, transition: { duration: 1.2, ease } }
-          }
-          whileTap={phase === 'idle' ? { scale: 0.98 } : undefined}
         >
           {/* ── back panel with rose liner ── */}
           <div className="absolute inset-0 rounded-[6px] bg-[#e6dac4] shadow-[0_2px_3px_rgba(60,50,30,.12),0_24px_40px_-18px_rgba(60,50,30,.5)]">
@@ -103,18 +86,9 @@ export function Envelope({ onOpenStart, onOpened }: { onOpenStart?: () => void; 
           </div>
 
           {/* ── the invitation card inside ── */}
-          <motion.div
-            className="paper absolute left-[6%] right-[6%] top-[5%] bottom-[4%] flex flex-col items-center justify-center rounded-[3px] text-center shadow-[0_2px_8px_rgba(60,50,30,.18)]"
+          <div
+            className="env-card paper absolute left-[6%] right-[6%] top-[5%] bottom-[4%] flex flex-col items-center justify-center rounded-[3px] text-center shadow-[0_2px_8px_rgba(60,50,30,.18)]"
             style={{ zIndex: 2 }}
-            initial={false}
-            animate={
-              phase === 'presenting'
-                ? { y: '-62%', scale: 1.12, z: 40 }
-                : sliding
-                  ? { y: '-62%', scale: 1, z: 0 }
-                  : { y: '0%', scale: 1, z: 0 }
-            }
-            transition={{ duration: phase === 'presenting' ? 0.8 : 1.25, ease }}
           >
             <div className="pointer-events-none absolute inset-[4%] border border-gold/45" />
             <p className="font-caps text-[2.4cqw] uppercase tracking-[0.3em] text-olive/70">{wording.together}</p>
@@ -122,12 +96,12 @@ export function Envelope({ onOpenStart, onOpened }: { onOpenStart?: () => void; 
               {couple.one.first} <span className="font-serif text-[5cqw] italic">&amp;</span> {couple.two.first}
             </p>
             <p className="mt-[1.5cqw] font-caps text-[2.4cqw] uppercase tracking-[0.3em] text-olive/70">{wedding.short}</p>
-          </motion.div>
+          </div>
 
           {/* ── front pocket ── */}
           <svg viewBox="0 0 142 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" style={{ zIndex: 3 }} aria-hidden="true">
             <defs>
-              <Grain id="env-grain" />
+              <GrainPattern />
               <linearGradient id="pocket-side" x1="0" x2="1">
                 <stop offset="0" stopColor="#efe5d3" />
                 <stop offset="1" stopColor="#e6dac3" />
@@ -140,15 +114,14 @@ export function Envelope({ onOpenStart, onOpened }: { onOpenStart?: () => void; 
                 <stop offset="0" stopColor="#f6efe2" />
                 <stop offset="1" stopColor="#ece2cf" />
               </linearGradient>
-              <filter id="pocket-shadow" x="-10%" y="-20%" width="120%" height="140%">
-                <feDropShadow dx="0" dy="-0.6" stdDeviation="0.9" floodColor="#5a4a30" floodOpacity=".25" />
-              </filter>
             </defs>
-            <path d="M0 3 L66 55 Q71 58 66 61 L0 100 Z" fill="url(#pocket-side)" filter="url(#pocket-shadow)" />
-            <path d="M142 3 L76 55 Q71 58 76 61 L142 100 Z" fill="url(#pocket-side-r)" filter="url(#pocket-shadow)" />
-            <path d="M0 100 L62 50 Q71 44 80 50 L142 100 Z" fill="url(#pocket-bottom)" filter="url(#pocket-shadow)" />
-            <path d="M0 100 L62 50 Q71 44 80 50 L142 100 Z" fill="#000" filter="url(#env-grain)" opacity=".18" />
-            <path d="M0 3 L66 55 Q71 58 66 61 L0 100 Z M142 3 L76 55 Q71 58 76 61 L142 100 Z" fill="#000" filter="url(#env-grain)" opacity=".16" />
+            <path d="M0 3 L66 55 Q71 58 66 61 L0 100 Z" fill="url(#pocket-side)" />
+            <path d="M142 3 L76 55 Q71 58 76 61 L142 100 Z" fill="url(#pocket-side-r)" />
+            {/* soft fold shadows drawn as strokes instead of filters */}
+            <path d="M0 3 L66 55 Q71 58 66 61 L0 100 M142 3 L76 55 Q71 58 76 61 L142 100" fill="none" stroke="#5a4a30" strokeOpacity=".12" strokeWidth="3" vectorEffect="non-scaling-stroke" />
+            <path d="M0 100 L62 50 Q71 44 80 50 L142 100" fill="none" stroke="#5a4a30" strokeOpacity=".14" strokeWidth="4" vectorEffect="non-scaling-stroke" />
+            <path d="M0 100 L62 50 Q71 44 80 50 L142 100 Z" fill="url(#pocket-bottom)" />
+            <path d="M0 3 L66 55 Q71 58 66 61 L0 100 Z M142 3 L76 55 Q71 58 76 61 L142 100 Z M0 100 L62 50 Q71 44 80 50 L142 100 Z" fill="url(#env-tex)" opacity=".7" />
             <path d="M2 99 L62 51 Q71 45 80 51 L140 99" fill="none" stroke="#c6a46c" strokeWidth=".35" opacity=".8" vectorEffect="non-scaling-stroke" />
           </svg>
 
@@ -167,13 +140,7 @@ export function Envelope({ onOpenStart, onOpened }: { onOpenStart?: () => void; 
           </div>
 
           {/* ── flap (3D) ── */}
-          <motion.div
-            className="absolute inset-0"
-            style={{ transformOrigin: '50% 0%', transformStyle: 'preserve-3d', zIndex: flapBehind ? 1 : 4 }}
-            initial={false}
-            animate={{ rotateX: opened ? 178 : 0 }}
-            transition={{ duration: 1.05, ease }}
-          >
+          <div className="env-flap absolute inset-0" style={{ zIndex: flapBehind ? 1 : 4 }}>
             {/* outside */}
             <svg
               viewBox="0 0 142 100"
@@ -183,17 +150,14 @@ export function Envelope({ onOpenStart, onOpened }: { onOpenStart?: () => void; 
               aria-hidden="true"
             >
               <defs>
-                <Grain id="flap-grain" />
                 <linearGradient id="flap-fill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stopColor="#efe6d5" />
                   <stop offset="1" stopColor="#f7f1e6" />
                 </linearGradient>
-                <filter id="flap-shadow" x="-10%" y="-10%" width="120%" height="140%">
-                  <feDropShadow dx="0" dy="1" stdDeviation="1.2" floodColor="#4a3c25" floodOpacity=".3" />
-                </filter>
               </defs>
-              <path d={FLAP} fill="url(#flap-fill)" filter="url(#flap-shadow)" />
-              <path d={FLAP} fill="#000" filter="url(#flap-grain)" opacity=".16" />
+              <path d="M0 0 L62 58.8 Q71 64.8 80 58.8 L142 0" fill="none" stroke="#4a3c25" strokeOpacity=".16" strokeWidth="5" vectorEffect="non-scaling-stroke" />
+              <path d={FLAP} fill="url(#flap-fill)" />
+              <path d={FLAP} fill="url(#env-tex)" opacity=".7" />
               <path d="M1 1 L62 57.5 Q71 63 80 57.5 L141 1" fill="none" stroke="#c6a46c" strokeWidth=".45" vectorEffect="non-scaling-stroke" />
             </svg>
             {/* inside (liner), visible once the flap passes 90° */}
@@ -213,34 +177,25 @@ export function Envelope({ onOpenStart, onOpened }: { onOpenStart?: () => void; 
               <path d={FLAP_INNER} fill="url(#liner)" />
               <path d={FLAP_INNER} fill="none" stroke="#e8dcc8" strokeWidth="2.4" vectorEffect="non-scaling-stroke" />
             </svg>
-          </motion.div>
+          </div>
 
           {/* ── ribbon + seal ── */}
           <div className="pointer-events-none absolute left-1/2 top-[61%] w-[19%] -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 5 }}>
-            <WaxSeal broken={phase !== 'idle'} className="relative w-full drop-shadow-[0_3px_3px_rgba(40,35,20,.35)]" />
+            <WaxSeal broken={phase !== 'idle'} className="relative w-full" />
             {phase === 'idle' && (
               <span className="seal-pulse absolute inset-[-6%] rounded-full border border-gold/60" aria-hidden="true" />
             )}
           </div>
 
-          {sliding && <PetalBurst className="z-[6]" count={20} />}
-        </motion.div>
-      </motion.div>
+          {sliding && <PetalBurst className="z-[6]" count={14} />}
+        </div>
+      </div>
 
       {/* tap hint */}
-      <motion.div
-        className="mt-[7vh] flex flex-col items-center gap-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: phase === 'idle' ? 1 : 0 }}
-        transition={{ duration: 0.8, delay: phase === 'idle' ? 1.6 : 0 }}
-      >
+      <div className="env-hint mt-[7vh] flex flex-col items-center gap-2">
         <span className="hint-pulse font-caps text-[11px] uppercase tracking-[0.34em] text-olive/80">{wording.envelopeHint}</span>
-        <motion.span
-          className="block h-6 w-px bg-gradient-to-b from-gold to-transparent"
-          animate={{ scaleY: [0.4, 1, 0.4], originY: 0 }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </motion.div>
+        <span className="env-hint-line block h-6 w-px bg-gradient-to-b from-gold to-transparent" />
+      </div>
     </motion.div>
   );
 }
