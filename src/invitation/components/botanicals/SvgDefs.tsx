@@ -1,12 +1,12 @@
 import { invitation } from '../../config/invitation';
 
-const { colors } = invitation.theme;
 
 /**
  * Shared gradients for every inline SVG on the page.
  * (Kept at 0×0 instead of display:none — hidden defs stop gradients rendering in some browsers.)
  */
 export function SvgDefs() {
+  const { colors } = invitation.theme;
   return (
     <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true" focusable="false">
       <defs>

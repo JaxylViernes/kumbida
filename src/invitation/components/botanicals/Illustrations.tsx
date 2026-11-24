@@ -1,4 +1,4 @@
-import { Draw, GOLD, Grow, INK, Leaf, Rose, Sprinkle } from './parts';
+import { Draw, gold, Grow, INK, Leaf, Rose, Sprinkle } from './parts';
 
 /** Little garden chapel — ceremony location vignette. */
 export function Chapel({ className = '', delay = 0 }: { className?: string; delay?: number }) {
@@ -7,7 +7,7 @@ export function Chapel({ className = '', delay = 0 }: { className?: string; dela
       <ellipse cx="70" cy="70" rx="64" ry="12" fill="url(#wash-sage)" />
       <ellipse cx="70" cy="42" rx="30" ry="30" fill="url(#wash-gold)" />
       <Draw d="M50 74 V40 L70 24 L90 40 V74" delay={delay} />
-      <Draw d="M64 25 V12 M60 16 H68" stroke={GOLD} delay={delay + 0.4} />
+      <Draw d="M64 25 V12 M60 16 H68" stroke={gold()} delay={delay + 0.4} />
       <Draw d="M66 22 L70 18 L74 22" delay={delay + 0.4} width={0.8} />
       <Draw d="M62 74 V58 a8 8 0 0 1 16 0 V74" delay={delay + 0.6} />
       <Draw d="M66 44 a4 4 0 0 1 8 0 v6 h-8z" delay={delay + 0.8} width={0.8} />
@@ -41,11 +41,11 @@ export function Pavilion({ className = '', delay = 0 }: { className?: string; de
       <Draw d="M30 42 H110" delay={delay + 0.4} width={0.8} />
       <Draw d="M48 74 V62 h44 V74 M52 62 v-3 M88 62 v-3" delay={delay + 0.6} width={0.8} />
       <Draw d="M14 74 H126" delay={delay + 0.2} width={0.7} opacity={0.7} />
-      <Draw d="M22 30 Q46 46 70 34 Q94 46 118 30" delay={delay + 0.7} width={0.5} stroke={GOLD} />
+      <Draw d="M22 30 Q46 46 70 34 Q94 46 118 30" delay={delay + 0.7} width={0.5} stroke={gold()} />
       <Grow delay={delay + 1.1}>
         {bulbs.map((x, i) => {
           const y = x < 70 ? 30 + Math.sin(((x - 22) / 48) * Math.PI) * 9 + 2 : 30 + Math.sin(((x - 70) / 48) * Math.PI) * 9 + 2;
-          return <circle key={i} cx={x} cy={y} r={1.6} fill="#f6e2a8" stroke={GOLD} strokeWidth={0.4} />;
+          return <circle key={i} cx={x} cy={y} r={1.6} fill="#f6e2a8" stroke={gold()} strokeWidth={0.4} />;
         })}
         <Rose x={70} y={22} r={5} />
         <Leaf x={64} y={23} a={190} s={0.45} />
@@ -61,8 +61,8 @@ export function Gown({ className = '', delay = 0 }: { className?: string; delay?
   return (
     <svg viewBox="0 0 80 140" className={className} aria-hidden="true">
       <ellipse cx="40" cy="100" rx="34" ry="40" fill="url(#wash-rose)" />
-      <Draw d="M40 13 c0 -6 6 -6 6 -2 c0 3 -6 3 -6 7" stroke={GOLD} delay={delay} width={0.9} />
-      <Draw d="M20 24 L40 16 L60 24" stroke={GOLD} delay={delay + 0.1} width={0.9} />
+      <Draw d="M40 13 c0 -6 6 -6 6 -2 c0 3 -6 3 -6 7" stroke={gold()} delay={delay} width={0.9} />
+      <Draw d="M20 24 L40 16 L60 24" stroke={gold()} delay={delay + 0.1} width={0.9} />
       <Draw d="M32 22 L33 34 M48 22 L47 34" delay={delay + 0.3} width={0.8} />
       <Draw d="M33 34 C36 38 44 38 47 34 L49 52 C44 55 36 55 31 52 Z" delay={delay + 0.4} />
       <Draw d="M31 52 C24 80 14 110 8 134 C30 139 50 139 72 134 C66 110 56 80 49 52" delay={delay + 0.6} duration={2} />
@@ -78,8 +78,8 @@ export function Suit({ className = '', delay = 0 }: { className?: string; delay?
   return (
     <svg viewBox="0 0 80 140" className={className} aria-hidden="true">
       <ellipse cx="40" cy="78" rx="34" ry="46" fill="url(#wash-sage)" />
-      <Draw d="M40 13 c0 -6 6 -6 6 -2 c0 3 -6 3 -6 7" stroke={GOLD} delay={delay} width={0.9} />
-      <Draw d="M18 26 L40 18 L62 26" stroke={GOLD} delay={delay + 0.1} width={0.9} />
+      <Draw d="M40 13 c0 -6 6 -6 6 -2 c0 3 -6 3 -6 7" stroke={gold()} delay={delay} width={0.9} />
+      <Draw d="M18 26 L40 18 L62 26" stroke={gold()} delay={delay + 0.1} width={0.9} />
       <Draw d="M22 26 L40 30 L58 26 L66 38 L64 118 L44 122 L40 72 L36 122 L16 118 L14 38 Z" delay={delay + 0.3} duration={2} />
       <Draw d="M40 30 L31 46 L40 72 M40 30 L49 46 L40 72" delay={delay + 0.7} width={0.8} />
       <Draw d="M35 34 L40 37 L35 40 Z M45 34 L40 37 L45 40 Z" delay={delay + 0.9} width={0.8} stroke={INK} />
@@ -119,15 +119,15 @@ export function StoryVignette({ kind, className = '' }: { kind: 'meet' | 'date' 
       )}
       {kind === 'proposal' && (
         <>
-          <Draw d="M50 52 a12 12 0 1 1 0.01 0" stroke={GOLD} delay={d} width={1.3} />
+          <Draw d="M50 52 a12 12 0 1 1 0.01 0" stroke={gold()} delay={d} width={1.3} />
           <Draw d="M44 30 L50 22 L56 30 L50 36 Z" delay={d + 0.4} />
           <Draw d="M44 30 H56 M50 22 L48 30 L50 36 L52 30 Z" delay={d + 0.6} width={0.6} />
-          <Draw d="M30 22 l2 -4 l2 4 l-2 4z M70 26 l1.5 -3 l1.5 3 l-1.5 3z" stroke={GOLD} delay={d + 0.9} width={0.7} />
+          <Draw d="M30 22 l2 -4 l2 4 l-2 4z M70 26 l1.5 -3 l1.5 3 l-1.5 3z" stroke={gold()} delay={d + 0.9} width={0.7} />
         </>
       )}
       {kind === 'forever' && (
         <>
-          <Draw d="M50 42 C40 28 22 28 22 42 C22 56 40 56 50 42 C60 28 78 28 78 42 C78 56 60 56 50 42" stroke={GOLD} delay={d} width={1.2} duration={2.2} />
+          <Draw d="M50 42 C40 28 22 28 22 42 C22 56 40 56 50 42 C60 28 78 28 78 42 C78 56 60 56 50 42" stroke={gold()} delay={d} width={1.2} duration={2.2} />
           <Grow delay={d + 1.2}>
             <Rose x={50} y={64} r={6} />
             <Leaf x={42} y={65} a={190} s={0.5} />

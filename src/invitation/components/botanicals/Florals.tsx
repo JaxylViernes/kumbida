@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { alongCubic, cubicPath, type Pt } from '../../lib/geometry';
 import { invitation } from '../../config/invitation';
-import { Bud, Draw, GOLD, Grow, INK, Leaf, Rose, Sprinkle } from './parts';
+import { Bud, Draw, gold as goldColor, Grow, INK, Leaf, Rose, Sprinkle } from './parts';
 
 type Corner = 'tl' | 'tr' | 'bl' | 'br';
 const flip: Record<Corner, string> = {
@@ -97,8 +97,8 @@ export function Laurel({ className = '', delay = 0, gold = false }: { className?
   const right = alongCubic([60, 12], [76, 9], [96, 9], [114, 13], 5, 0.12, 0.95);
   return (
     <svg viewBox="0 0 120 24" className={className} aria-hidden="true">
-      <Draw d="M60 12 C44 9 24 9 6 13" delay={delay} duration={1.2} width={0.8} stroke={gold ? GOLD : INK} />
-      <Draw d="M60 12 C76 9 96 9 114 13" delay={delay} duration={1.2} width={0.8} stroke={gold ? GOLD : INK} />
+      <Draw d="M60 12 C44 9 24 9 6 13" delay={delay} duration={1.2} width={0.8} stroke={gold ? goldColor() : INK} />
+      <Draw d="M60 12 C76 9 96 9 114 13" delay={delay} duration={1.2} width={0.8} stroke={gold ? goldColor() : INK} />
       {[...left, ...right].map((q, i) => (
         <Grow key={i} delay={delay + 0.3 + (i % 5) * 0.1}>
           <Leaf x={q.x} y={q.y} a={q.a + (i % 2 ? 40 : -40)} s={0.42} tone={gold ? 'gold' : 'sage'} />
@@ -123,9 +123,9 @@ export function Divider({ className = '', delay = 0 }: { className?: string; del
     >
       <span className="gold-line h-px w-[22%]" />
       <svg viewBox="0 0 24 10" className="h-[9px] w-6">
-        <circle cx="3" cy="5" r="1" fill={GOLD} />
+        <circle cx="3" cy="5" r="1" fill={goldColor()} />
         <path d="M12 0.8 L15.6 5 L12 9.2 L8.4 5Z" fill="url(#gold-flat)" />
-        <circle cx="21" cy="5" r="1" fill={GOLD} />
+        <circle cx="21" cy="5" r="1" fill={goldColor()} />
       </svg>
       <span className="gold-line h-px w-[22%]" />
     </motion.div>
@@ -197,7 +197,7 @@ export function Monogram({ className = '', delay = 0 }: { className?: string; de
         <text x="44" y="70" textAnchor="middle" fontFamily="'Pinyon Script', cursive" fontSize="40" fill="url(#gold-foil)">
           {a}
         </text>
-        <text x="60" y="66" textAnchor="middle" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fontSize="14" fill={GOLD}>
+        <text x="60" y="66" textAnchor="middle" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fontSize="14" fill={goldColor()}>
           &amp;
         </text>
         <text x="77" y="78" textAnchor="middle" fontFamily="'Pinyon Script', cursive" fontSize="40" fill="url(#gold-foil)">

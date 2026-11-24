@@ -1,75 +1,11 @@
 /**
- * ─────────────────────────────────────────────────────────────────────────
- *  INVITATION CONFIGURATION
- *  Every word, name, date, color, photo and setting lives here.
- *  ALL CONTENT BELOW IS SAMPLE / PLACEHOLDER CONTENT — replace it with the
- *  couple's real details before sending the link.
- * ─────────────────────────────────────────────────────────────────────────
+ * Sample content for the "Enchanted Garden" template — used for the public demo
+ * and as the starting point a couple edits in the builder.
+ * Names, venues and story are FICTIONAL.
  */
+import { asset, type FilmMoment, type Phase, type PageId, type ScheduleItem, type Secret, type StoryIllustration, type StoryMoment, type Swatch, type Venue } from '../../invitation/config/types';
 
-/**
- * Files in /public. Write paths from the site root ('/photos/x.jpg'); this adds the
- * deploy folder automatically (e.g. /kumbida/ on GitHub Pages).
- */
-export const asset = (path: string) => {
-  const base = import.meta.env.BASE_URL;
-  if (!path || /^(https?:|data:|blob:)/.test(path) || (base !== '/' && path.startsWith(base))) return path;
-  return base + path.replace(/^\//, '');
-};
-
-export type StoryIllustration = 'meet' | 'date' | 'proposal' | 'forever';
-
-export interface StoryMoment {
-  title: string;
-  when: string;
-  text: string;
-  note: string; // small handwritten annotation beside the photo
-  photo?: string; // e.g. asset('/photos/meet.jpg') — leave empty for an illustrated placeholder
-  illustration: StoryIllustration;
-}
-
-export interface Venue {
-  label: string;
-  date: string;
-  time: string;
-  name: string;
-  address: string[];
-  /** Optional explicit Google Maps link. If empty, a search link is built from the address. */
-  mapsUrl?: string;
-}
-
-export interface FilmMoment {
-  title: string;
-  caption: string;
-  /** Still image for the frame, e.g. '/photos/beach.jpg' */
-  photo?: string;
-  /** Short clip (MP4/H.264, ideally < 3 MB, ~10 s, 720p). Loaded only when opened. */
-  video?: string;
-  /** Optional voice message from the couple (MP3/M4A). */
-  voice?: string;
-  illustration: StoryIllustration;
-}
-
-export interface Secret {
-  title: string;
-  body: string;
-  signoff?: string;
-}
-
-export interface ScheduleItem {
-  time: string;
-  title: string;
-  note?: string;
-}
-
-export type Phase = 'before' | 'day' | 'after';
-
-export interface Swatch {
-  name: string;
-  hex: string;
-}
-
-export const invitation = {
+export const enchantedGardenSample = {
   couple: {
     one: { first: 'Amelia', full: 'Amelia Rose Navarro' },
     two: { first: 'Julian', full: 'Julian Andres Villanueva' },
@@ -402,20 +338,4 @@ export const invitation = {
   } as Record<Phase, PageId[]>,
 };
 
-export type PageId =
-  | 'invitation'
-  | 'savedate'
-  | 'story'
-  | 'moments'
-  | 'film'
-  | 'letter'
-  | 'details'
-  | 'reception'
-  | 'entourage'
-  | 'sponsors'
-  | 'attire'
-  | 'rsvp'
-  | 'guestbook'
-  | 'farewell'
-  | 'ps'
-  | 'thanks';
+export type InvitationConfig = typeof enchantedGardenSample;

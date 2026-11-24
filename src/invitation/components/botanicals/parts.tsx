@@ -2,7 +2,8 @@ import type { CSSProperties, ReactNode } from 'react';
 import { invitation } from '../../config/invitation';
 
 export const INK = '#5a6048';
-export const GOLD = invitation.theme.colors.gold;
+/** current palette's gold (read at render time, so palette swaps apply) */
+export const gold = () => invitation.theme.colors.gold;
 
 /**
  * A line that draws itself. Pure CSS animation (no per-frame JavaScript),
