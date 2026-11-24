@@ -1,8 +1,14 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AuthProvider, RequireAuth, RequireStaff } from './auth';
+
+const LoginPage = lazy(() => import('./LoginPage'));
+const DashboardPage = lazy(() => import('./AccountPages').then((m) => ({ default: m.DashboardPage })));
+const AdminPage = lazy(() => import('./AccountPages').then((m) => ({ default: m.AdminPage })));
 
 /**
  * The Kumbida platform (marketing site, ordering, dashboards, admin).
- * Phase 0: only the routing shell — the real pages arrive in later phases.
+ * Phase 1: sign-in, customer and admin areas wired up; pages fill in later phases.
  */
 function NotFound() {
   return (
@@ -16,12 +22,41 @@ function NotFound() {
   );
 }
 
+function Loading() {
+  return (
+    <div className="flex min-h-full items-center justify-center bg-ivory">
+      <span className="h-6 w-6 animate-spin rounded-full border-2 border-gold/30 border-t-gold" aria-label="Loading" />
+    </div>
+  );
+}
+
 export default function PlatformApp() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-      <Routes>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <AuthProvider>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/dashboard/*"
+              element={
+                <RequireAuth>
+                  <DashboardPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/*"
+              element={
+                <RequireStaff>
+                  <AdminPage />
+                </RequireStaff>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

@@ -1,11 +1,9 @@
 /**
- * Guestbook messages.
- * Supabase table `guestbook` (see supabase/schema.sql) is insert-only for guests:
- * nobody can read other guests' messages — only the couple, from the dashboard.
- * Without a backend, messages stay in this browser (preview mode).
+ * Guestbook messages. Guests can only add notes (via sign_guestbook); only the
+ * couple and the Kumbida team can read them. Demos keep notes in this browser.
  */
-import { invitation } from '../config/invitation';
-import { backendConfigured, getClient, readLocal, writeLocal } from './backend';
+import { getInvitationMeta, invitation } from '../config/invitation';
+import { deviceKey, isLive, readLocal, rpc, RpcError, writeLocal } from './backend';
 
 export interface GuestbookEntry {
   name: string;
@@ -14,10 +12,9 @@ export interface GuestbookEntry {
   at: string;
 }
 
-const DEVICE_KEY = 'invite:guestbook:mine';
-const table = import.meta.env.VITE_SUPABASE_GUESTBOOK_TABLE || 'guestbook';
+const DEVICE_KEY = () => deviceKey('guestbook:mine');
 
-export const myEntries = () => readLocal<GuestbookEntry[]>(DEVICE_KEY) || [];
+export const myEntries = () => readLocal<GuestbookEntry[]>(DEVICE_KEY()) || [];
 
 export function validateEntry(name: string, message: string) {
   const errors: { name?: string; message?: string } = {};
@@ -41,22 +38,22 @@ export async function signGuestbook(input: { name: string; message: string; shar
     shareable: input.shareable,
     at: new Date().toISOString(),
   };
-  if (backendConfigured) {
+  if (isLive()) {
     try {
-      const client = await getClient();
-      const { error } = await client.from(table).insert({
-        name: entry.name,
-        message: entry.message,
-        shareable: entry.shareable,
+      await rpc('sign_guestbook', {
+        p_slug: getInvitationMeta()!.slug,
+        p_name: entry.name,
+        p_message: entry.message,
+        p_shareable: entry.shareable,
       });
-      if (error) throw error;
     } catch (e) {
+      if (e instanceof RpcError && e.code === 'P0001') return { ok: false as const, message: e.message };
       console.error('[guestbook]', e);
       return { ok: false as const, message: 'We couldn’t save your message. Please check your connection and try again.' };
     }
   } else {
     await new Promise((r) => setTimeout(r, 700));
   }
-  writeLocal(DEVICE_KEY, [...mine, entry]);
+  writeLocal(DEVICE_KEY(), [...mine, entry]);
   return { ok: true as const, entry };
 }

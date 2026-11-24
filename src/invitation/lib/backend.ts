@@ -1,22 +1,16 @@
-/** Optional Supabase connection shared by the RSVP and guestbook. */
+/**
+ * Where an invitation's RSVPs and guestbook notes go:
+ *  - a real invitation (/i/:slug, loaded from the database) -> Supabase functions;
+ *  - demos and previews -> this browser only, so the flow can be tried safely.
+ */
+import { getInvitationMeta } from '../config/invitation';
 
-const url = import.meta.env.VITE_SUPABASE_URL;
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+export { rpc, RpcError } from '../../lib/rest';
 
-export const backendConfigured = Boolean(url && key);
+export const isLive = () => getInvitationMeta() !== null;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let clientPromise: Promise<any> | null = null;
-
-/** Loaded lazily, only when a backend is configured — keeps first load light. */
-export function getClient() {
-  if (!clientPromise) {
-    clientPromise = import('@supabase/supabase-js').then(({ createClient }) =>
-      createClient(url!, key!, { auth: { persistSession: false } }),
-    );
-  }
-  return clientPromise;
-}
+/** per-invitation key for things this device remembers (its own reply, notes) */
+export const deviceKey = (name: string) => `invite:${getInvitationMeta()?.slug ?? 'demo'}:${name}`;
 
 export function readLocal<T>(k: string): T | null {
   try {
@@ -31,6 +25,6 @@ export function writeLocal(k: string, v: unknown) {
   try {
     localStorage.setItem(k, JSON.stringify(v));
   } catch {
-    /* private mode / storage full — ignore */
+    /* private mode / storage full: ignore */
   }
 }

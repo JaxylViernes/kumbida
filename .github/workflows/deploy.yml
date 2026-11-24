@@ -1,6 +1,6 @@
 # Builds the invitation and publishes it to GitHub Pages on every push to main.
 # One-time setup: repo Settings → Pages → Source: "GitHub Actions".
-# Optional RSVP/guestbook backend: add repo secrets VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.
+# Supabase public settings come from .env.production.
 name: Deploy to GitHub Pages
 
 on:
@@ -30,8 +30,8 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      # GitHub Pages has no app routing: serve the app for any unknown path (/login, /i/..., etc.)
+      - run: cp dist/index.html dist/404.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

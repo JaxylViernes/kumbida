@@ -6,7 +6,8 @@
  * In both modes this device remembers its reply so it can't be sent twice.
  */
 
-import { backendConfigured, getClient, readLocal, writeLocal } from './backend';
+import { getInvitationMeta } from '../config/invitation';
+import { deviceKey, isLive, readLocal, rpc, RpcError, writeLocal } from './backend';
 
 export interface RsvpInput {
   name: string;
@@ -23,12 +24,8 @@ export type RsvpResult =
   | { ok: true; reply: StoredReply }
   | { ok: false; reason: 'duplicate' | 'network' | 'invalid'; message: string };
 
-const DEVICE_KEY = 'invite:rsvp:reply';
-const DEMO_DB_KEY = 'invite:rsvp:demo-db';
-
-const table = import.meta.env.VITE_SUPABASE_RSVP_TABLE || 'rsvps';
-
-export { backendConfigured };
+const DEVICE_KEY = () => deviceKey('rsvp:reply');
+const DEMO_DB_KEY = () => deviceKey('rsvp:demo-db');
 
 export const normalizeName = (name: string) =>
   name
@@ -59,7 +56,7 @@ export function validate(input: RsvpInput, maxGuests: number): RsvpErrors {
 const safeGet = readLocal;
 const safeSet = writeLocal;
 
-export const getDeviceReply = () => safeGet<StoredReply>(DEVICE_KEY);
+export const getDeviceReply = () => safeGet<StoredReply>(DEVICE_KEY());
 
 export async function submitRsvp(raw: RsvpInput): Promise<RsvpResult> {
   const input: RsvpInput = {
@@ -77,46 +74,40 @@ export async function submitRsvp(raw: RsvpInput): Promise<RsvpResult> {
 
   const reply: StoredReply = { ...input, at: new Date().toISOString() };
 
-  if (backendConfigured) {
+  if (isLive()) {
+    const m = getInvitationMeta()!;
     try {
-      const client = await getClient();
-      const { error } = await client.from(table).insert({
-        name: input.name,
-        name_key: nameKey,
-        attending: input.attending,
-        guests: input.guests,
-        message: input.message || null,
+      await rpc('submit_rsvp', {
+        p_slug: m.slug,
+        p_guest_token: m.guestToken,
+        p_name: input.name,
+        p_attending: input.attending,
+        p_guests: input.guests,
+        p_message: input.message,
       });
-      if (error) {
-        if (error.code === '23505') {
-          return {
-            ok: false,
-            reason: 'duplicate',
-            message: 'We already have a reply under this name. Please message the couple if anything has changed.',
-          };
-        }
-        throw error;
-      }
     } catch (e) {
+      if (e instanceof RpcError && e.code === '23505') {
+        return {
+          ok: false,
+          reason: 'duplicate',
+          message: 'We already have a reply under this name. Please message the couple if anything has changed.',
+        };
+      }
+      if (e instanceof RpcError && e.code === 'P0001') return { ok: false, reason: 'invalid', message: e.message };
       console.error('[rsvp]', e);
-      return {
-        ok: false,
-        reason: 'network',
-        message: 'We couldn’t send your reply. Please check your connection and try again.',
-      };
+      return { ok: false, reason: 'network', message: 'We couldn’t send your reply. Please check your connection and try again.' };
     }
   } else {
-    // Demo mode
+    // demo / preview: kept in this browser only
     await new Promise((r) => setTimeout(r, 900));
-    const db = safeGet<Record<string, StoredReply>>(DEMO_DB_KEY) || {};
+    const db = safeGet<Record<string, StoredReply>>(DEMO_DB_KEY()) || {};
     if (db[nameKey]) {
       return { ok: false, reason: 'duplicate', message: 'We already have a reply under this name.' };
     }
     db[nameKey] = reply;
-    safeSet(DEMO_DB_KEY, db);
-    console.info('[rsvp] Demo mode — reply stored in this browser only. Configure Supabase to collect replies.');
+    safeSet(DEMO_DB_KEY(), db);
   }
 
-  safeSet(DEVICE_KEY, reply);
+  safeSet(DEVICE_KEY(), reply);
   return { ok: true, reply };
 }

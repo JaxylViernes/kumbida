@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { setInvitation, type InvitationConfig } from './config/invitation';
+import { setInvitation, type InvitationConfig, type InvitationMeta } from './config/invitation';
 import { applyTheme } from './lib/theme';
 
 /** Device hints used by the CSS to keep phones smooth, plus the ?fps=1 debug meter. */
@@ -40,8 +40,8 @@ function deviceHints() {
  * Show one invitation full-screen. The config is set *before* the invitation's
  * code loads, so everything it computes on load sees the right couple.
  */
-export async function bootInvitation(root: HTMLElement, config: InvitationConfig) {
-  setInvitation(config);
+export async function bootInvitation(root: HTMLElement, config: InvitationConfig, meta: InvitationMeta | null = null) {
+  setInvitation(config, meta);
   applyTheme();
   deviceHints();
   const { default: InvitationApp } = await import('./InvitationApp');
